@@ -23,10 +23,13 @@ import androidx.compose.ui.text.font.FontWeight
 
 @Preview(showBackground = true)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onSettingsClick: () -> Unit = {},
+    onConnectClick: () -> Unit = {}
+) {
     Box(modifier = Modifier.fillMaxSize().padding(24.dp))
     {
-        IconButton({},
+        IconButton({onSettingsClick()},
            Modifier.align(Alignment.TopEnd)
         )
     {   Icon(Icons.Default.Settings,"Settings")
@@ -40,7 +43,7 @@ fun HomeScreen() {
         )
         }
         Button(
-            {},
+            {onConnectClick()},
             Modifier.align(Alignment.BottomCenter).fillMaxWidth(0.8f)
         )
         {

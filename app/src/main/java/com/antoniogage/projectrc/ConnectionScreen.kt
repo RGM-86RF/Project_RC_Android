@@ -18,9 +18,9 @@ import androidx.compose.ui.unit.dp
 
 @Preview(showBackground = true)
 @Composable
-fun ConnectionScreen(){
+fun ConnectionScreen(onBackClick: () -> Unit = {}){
     Box(Modifier.fillMaxSize().padding(24.dp)){
-        IconButton({},modifier = Modifier.align(Alignment.TopStart)) {
+        IconButton({onBackClick()},modifier = Modifier.align(Alignment.TopStart)) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
         }
         Button(

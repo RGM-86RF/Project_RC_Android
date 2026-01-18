@@ -12,3 +12,4 @@ val Pink40 = Color(0xFF7D5260)
 
 val orangeish = Color(0xFFD77F68)
 val redishPurple = Color(0xFF8F025F)
+val backgroundlightPurp = Color(0xFFD5C9DB)

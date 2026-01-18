@@ -19,10 +19,10 @@ import androidx.compose.ui.unit.dp
 
 @Preview(showBackground = true)
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(onHomeClick: () -> Unit = {}) {
     // Implement your settings screen UI here
     Box(Modifier.fillMaxSize().padding(24.dp)){
-        IconButton({},
+        IconButton({onHomeClick()},
             Modifier.align(Alignment.TopStart)){
                 Icon(Icons.Default.Home,"Home")
             }
