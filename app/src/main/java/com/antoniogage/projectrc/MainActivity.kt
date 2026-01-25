@@ -1,5 +1,6 @@
 package com.antoniogage.projectrc
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,17 +27,33 @@ class MainActivity : ComponentActivity() {
                         startDestination = "Home",
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        composable("Home") { HomeScreen(
-                            onSettingsClick = { navController.navigate("settings")},
-                            onConnectClick = { navController.navigate("connection")}
-                        )
+                        composable("Home") {
+                            HomeScreen(
+                                onSettingsClick = { navController.navigate("settings") },
+                                onConnectClick = { navController.navigate("connection") }
+                            )
                         }
-                        composable("Settings") { SettingsScreen(onHomeClick = { navController.popBackStack()}) }
-                        composable("Connection") { ConnectionScreen(onBackClick = { navController.popBackStack()}) }
+                        composable("Settings") { SettingsScreen(onHomeClick = { navController.popBackStack() }) }
+                        composable("Connection") {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                                ConnectionScreen(
+                                    onBackClick = { navController.popBackStack() },
+                                    onDeviceConnected = {
+                                        navController.navigate("controller") {
+                                            popUpTo("connection") {
+                                                inclusive = true
+                                            }
+                                        }
+                                    }
+                                )
+                        }
+
+                        composable("Controller") {
+                            ControllerScreen()
+                        }
                     }
                 }
             }
         }
     }
 }
-
