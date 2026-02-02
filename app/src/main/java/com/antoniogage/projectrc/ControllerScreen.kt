@@ -1,5 +1,6 @@
 package com.antoniogage.projectrc
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
@@ -10,9 +11,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
@@ -21,30 +23,43 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
-fun ControllerScreen() {
+fun ControllerScreen(
+    bleViewModel: BLEViewModel,
+    onHomeClick: () -> Unit = {}
+) {
     LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+
+
+    IconButton(onClick = {
+        bleViewModel.disconnect()
+        onHomeClick()
+    }){
+        Icon(Icons.Default.Home,"Home")
+
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        DpadControl()
+
+
+        DpadControl(bleViewModel = bleViewModel)
     }
 
 }
 
-
 @Composable
-fun DpadControl(){
-    //TODO: put characteristic commands in on click functions
+fun DpadControl(bleViewModel: BLEViewModel){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        IconButton(onClick = { }){
+        IconButton(onClick = {bleViewModel.motorWrite(commands.forward)  }){
             Icon(painter = painterResource(id = R.drawable.dpad_up),
                 contentDescription = "Up"
 
@@ -53,20 +68,20 @@ fun DpadControl(){
         Row(modifier = Modifier.fillMaxWidth(0.4f),
             horizontalArrangement = Arrangement.SpaceBetween)
         {
-            IconButton(onClick = { }){
+            IconButton(onClick = {bleViewModel.motorWrite(commands.left) }){
                 Icon(painter = painterResource(id = R.drawable.dpad_left),
                     contentDescription = "Left"
 
                 )
             }
-            IconButton(onClick = { }){
+            IconButton(onClick = { bleViewModel.motorWrite(commands.right)}){
                 Icon(painter = painterResource(id = R.drawable.dpad_right),
                     contentDescription = "Right"
 
                 )
             }
         }
-        IconButton(onClick = { }){
+        IconButton(onClick = {bleViewModel.motorWrite(commands.backward) }){
             Icon(painter = painterResource(id = R.drawable.dpad_down),
                 contentDescription = "Down"
 
@@ -100,7 +115,7 @@ private fun Context.findActivity(): Activity? = when (this) {
 @Preview(showBackground = true)
 @Composable
 fun ControllerScreenPreview() {
-    ControllerScreen()
+    ControllerScreen(bleViewModel = viewModel())
 }
 
 

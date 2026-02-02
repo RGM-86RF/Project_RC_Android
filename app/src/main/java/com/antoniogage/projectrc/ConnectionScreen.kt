@@ -1,12 +1,8 @@
 package com.antoniogage.projectrc
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothProfile
 import android.os.Build
 import androidx.annotation.RequiresApi
-import android.util.Log
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,22 +19,57 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 
-// TODO: Separating data from the UI boxes for Available and paired devices
 
+@OptIn(ExperimentalPermissionsApi::class)
+@RequiresApi(Build.VERSION_CODES.M)
 @Preview(showBackground = true)
 @Composable
-fun ConnectionScreen(onBackClick: () -> Unit = {},
-                     onDeviceConnected:() -> Unit = {}){
+fun ConnectionScreen(
+    bleViewModel: BLEViewModel = viewModel(),
+    onBackClick: () -> Unit = {},
+    onDeviceConnected:() -> Unit = {}){
+
+    val context = LocalContext.current
+    val connectionStatus by bleViewModel._connectionStatus.collectAsState()
+
+    val blePermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+
+        listOf(
+            android.Manifest.permission.BLUETOOTH_SCAN,
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+        )
+    } else {
+        listOf(
+            android.Manifest.permission.BLUETOOTH,
+            android.Manifest.permission.BLUETOOTH_ADMIN)
+    }
+    val permissionState = rememberMultiplePermissionsState(permissions = blePermissions)
+
+    LaunchedEffect(Unit){
+        permissionState.launchMultiplePermissionRequest()
+    }
+
+
+    LaunchedEffect(connectionStatus){
+        if(connectionStatus == ConnectionStatus.READY){
+            onDeviceConnected()
+        }
+    }
+
+
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -53,62 +84,42 @@ fun ConnectionScreen(onBackClick: () -> Unit = {},
             Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
         }
         }
-
-        ConnectGatt(onDeviceConnected = onDeviceConnected)
-    }
-
-}
-
-
-@SuppressLint("MissingPermission")
-@RequiresApi(Build.VERSION_CODES.M)
-@Composable
-private fun ConnectGatt(onDeviceConnected: () -> Unit) {
-    var selectedDevice by remember { mutableStateOf<BluetoothDevice?>(null) }
-    var connectionStatus by remember { mutableStateOf(ConnectionStatus.DISCONNECTED) }
-
-    LaunchedEffect(connectionStatus) {
-        if (connectionStatus == ConnectionStatus.CONNECTED) {
-            onDeviceConnected()
-        }
-
-    }
-
-    BluetoothBox {
-        AnimatedContent(targetState = selectedDevice, label = "SelectedDevice") { device ->
-            if (device == null) {
-                FindDevicesScreen { clickedDevice ->
-                    selectedDevice = clickedDevice
-                }
-            } else {
-                BLEConnectEffect(device = device,
-                    onConnectionStatusChange = { newStatus ->
-                        connectionStatus = newStatus
-
-                        if (newStatus == ConnectionStatus.DISCONNECTED || newStatus == ConnectionStatus.FAILED) {
-                            selectedDevice = null
+        Box(modifier = Modifier.weight(1f)){
+            when{
+                !permissionState.allPermissionsGranted -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ){
+                        Text("Please grant location permissions")
+                        Button(onClick = { permissionState.launchMultiplePermissionRequest() }){
+                            Text("Grant permissions")
                         }
-                    }
-                )
+                }
+            }
 
+
+            }
+            if(connectionStatus == ConnectionStatus.CONNECTING || connectionStatus == ConnectionStatus.CONNECTED){
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
-                ) {
-                    when (connectionStatus) {
-                        ConnectionStatus.CONNECTING -> {
-                            CircularProgressIndicator()
-                            Text("Connecting to ${device.name ?: device.address}")
-                        }
-                        ConnectionStatus.CONNECTED -> {
-                            Text("Connected")
-                        }
-                        else -> {}
-                    }
+                ){
+                    CircularProgressIndicator()
+                    Text("Connecting...")
                 }
             }
-
+            else{
+                FindDevicesScreen { clickedDevice ->
+                    bleViewModel.connect(context, clickedDevice)
+                }
+            }
         }
+
     }
+
 }
+
+
