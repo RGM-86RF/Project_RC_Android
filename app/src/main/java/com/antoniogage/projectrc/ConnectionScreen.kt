@@ -1,6 +1,6 @@
 package com.antoniogage.projectrc
 
-import android.annotation.SuppressLint
+
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
@@ -34,15 +34,16 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RequiresApi(Build.VERSION_CODES.M)
-@Preview(showBackground = true)
+
 @Composable
 fun ConnectionScreen(
-    bleViewModel: BLEViewModel = viewModel(),
+    bleViewModel: BLEViewModel,
     onBackClick: () -> Unit = {},
     onDeviceConnected:() -> Unit = {}){
 
     val context = LocalContext.current
-    val connectionStatus by bleViewModel._connectionStatus.collectAsState()
+    val connectionStatus by bleViewModel.connectionStatus.collectAsState()
+
 
     val blePermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 
@@ -53,13 +54,15 @@ fun ConnectionScreen(
         )
     } else {
         listOf(
-            android.Manifest.permission.BLUETOOTH,
-            android.Manifest.permission.BLUETOOTH_ADMIN)
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+        )
     }
     val permissionState = rememberMultiplePermissionsState(permissions = blePermissions)
 
     LaunchedEffect(Unit){
-        permissionState.launchMultiplePermissionRequest()
+        if(!permissionState.allPermissionsGranted) {
+            permissionState.launchMultiplePermissionRequest()
+        }
     }
 
 
@@ -85,35 +88,37 @@ fun ConnectionScreen(
         }
         }
         Box(modifier = Modifier.weight(1f)){
-            when{
+            when {
                 !permissionState.allPermissionsGranted -> {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
-                    ){
+                    ) {
                         Text("Please grant location permissions")
-                        Button(onClick = { permissionState.launchMultiplePermissionRequest() }){
+                        Button(onClick = { permissionState.launchMultiplePermissionRequest() }) {
                             Text("Grant permissions")
                         }
-                }
-            }
+                    }
 
 
-            }
-            if(connectionStatus == ConnectionStatus.CONNECTING || connectionStatus == ConnectionStatus.CONNECTED){
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ){
-                    CircularProgressIndicator()
-                    Text("Connecting...")
                 }
-            }
-            else{
-                FindDevicesScreen { clickedDevice ->
-                    bleViewModel.connect(context, clickedDevice)
+
+                connectionStatus == ConnectionStatus.CONNECTING || connectionStatus == ConnectionStatus.CONNECTED -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator()
+                        Text("Connecting...")
+                    }
+                }
+
+                else -> {
+                    FindDevicesScreen { clickedDevice ->
+                        bleViewModel.connect(context, clickedDevice)
+                    }
                 }
             }
         }

@@ -59,7 +59,7 @@ fun DpadControl(bleViewModel: BLEViewModel){
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        IconButton(onClick = {bleViewModel.motorWrite(commands.forward)  }){
+        IconButton(onClick = {bleViewModel.motorWrite(Commands.forward)  }){
             Icon(painter = painterResource(id = R.drawable.dpad_up),
                 contentDescription = "Up"
 
@@ -68,20 +68,20 @@ fun DpadControl(bleViewModel: BLEViewModel){
         Row(modifier = Modifier.fillMaxWidth(0.4f),
             horizontalArrangement = Arrangement.SpaceBetween)
         {
-            IconButton(onClick = {bleViewModel.motorWrite(commands.left) }){
+            IconButton(onClick = {bleViewModel.motorWrite(Commands.left) }){
                 Icon(painter = painterResource(id = R.drawable.dpad_left),
                     contentDescription = "Left"
 
                 )
             }
-            IconButton(onClick = { bleViewModel.motorWrite(commands.right)}){
+            IconButton(onClick = { bleViewModel.motorWrite(Commands.right)}){
                 Icon(painter = painterResource(id = R.drawable.dpad_right),
                     contentDescription = "Right"
 
                 )
             }
         }
-        IconButton(onClick = {bleViewModel.motorWrite(commands.backward) }){
+        IconButton(onClick = {bleViewModel.motorWrite(Commands.backward) }){
             Icon(painter = painterResource(id = R.drawable.dpad_down),
                 contentDescription = "Down"
 

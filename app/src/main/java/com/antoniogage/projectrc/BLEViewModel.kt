@@ -2,6 +2,7 @@ package com.antoniogage.projectrc
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
@@ -9,9 +10,13 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import androidx.annotation.RequiresPermission
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 val CHARACTERISTIC_UUID: UUID = UUID.fromString("8451f5a9-bc8b-419b-b075-3838072fda82")
@@ -25,7 +30,7 @@ enum class ConnectionStatus {
     READY
 }
 
-object commands{
+object Commands{
     val forward : ByteArray = "f".toByteArray()
     val backward : ByteArray = "b".toByteArray()
     val left : ByteArray = "l".toByteArray()
@@ -34,53 +39,62 @@ object commands{
 }
 
 @SuppressLint("MissingPermission")
-class BLEViewModel() : ViewModel() {
-    private var BLEgatt: BluetoothGatt? = null
+class BLEViewModel(application: Application) : AndroidViewModel(application) {
+    private var bleGatt: BluetoothGatt? = null
     private var characteristic: BluetoothGattCharacteristic? = null
 
 
-   private val connectionStatus = MutableStateFlow(ConnectionStatus.DISCONNECTED)
-   val _connectionStatus: StateFlow<ConnectionStatus> = connectionStatus
+
+
+   private val _connectionStatus = MutableStateFlow(ConnectionStatus.DISCONNECTED)
+   val connectionStatus: StateFlow<ConnectionStatus> = _connectionStatus
 
 
 
 
-    private val bleGatt = object : BluetoothGattCallback(){
+    private val bleGattCallback = object : BluetoothGattCallback(){
 
         override fun onConnectionStateChange(
             gatt: BluetoothGatt,
             status: Int,
             newState: Int)
         {
-            when(newState){
-                BluetoothProfile.STATE_CONNECTED -> {
-                    connectionStatus.value = ConnectionStatus.CONNECTED
-                    gatt.discoverServices()
-                }
-                BluetoothProfile.STATE_DISCONNECTED -> {
-                    connectionStatus.value = ConnectionStatus.DISCONNECTED
-                    BLEgatt?.close()
-                    BLEgatt = null
-                    characteristic = null
-                }
-                else -> {
-                    connectionStatus.value = ConnectionStatus.FAILED
-                }
+            if(status == BluetoothGatt.GATT_SUCCESS) {
+                when (newState) {
+                    BluetoothProfile.STATE_CONNECTED -> {
+                        _connectionStatus.value = ConnectionStatus.CONNECTED
+                        gatt.discoverServices()
+                    }
+
+                    BluetoothProfile.STATE_DISCONNECTED -> {
+                        _connectionStatus.value = ConnectionStatus.DISCONNECTED
+                        bleGatt?.close()
+                        bleGatt = null
+                        characteristic = null
+                    }
+
 
                 }
 
+            }else {
+                _connectionStatus.value = ConnectionStatus.FAILED
+                bleGatt?.close()
+                bleGatt = null
+                characteristic = null
+            }
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             if(status == BluetoothGatt.GATT_SUCCESS){
-                characteristic = gatt.getService(SERVICE_UUID).getCharacteristic(CHARACTERISTIC_UUID)
+                characteristic = gatt.getService(SERVICE_UUID)?.getCharacteristic(CHARACTERISTIC_UUID)
                 if(characteristic == null){
-                    connectionStatus.value = ConnectionStatus.FAILED
+                    _connectionStatus.value = ConnectionStatus.FAILED
                 }else{
-                    connectionStatus.value = ConnectionStatus.READY
+                    _connectionStatus.value = ConnectionStatus.READY
+                    logConnection("BLE")
                 }
             }else{
-                connectionStatus.value = ConnectionStatus.FAILED
+                _connectionStatus.value = ConnectionStatus.FAILED
             }
         }
 
@@ -90,9 +104,9 @@ class BLEViewModel() : ViewModel() {
 
 
     fun connect(context: Context, device: BluetoothDevice){
-        if(BLEgatt == null) {
-            connectionStatus.value = ConnectionStatus.CONNECTING
-            BLEgatt = device.connectGatt(context, false, bleGatt)
+        if(bleGatt == null) {
+            _connectionStatus.value = ConnectionStatus.CONNECTING
+            bleGatt = device.connectGatt(context, false, bleGattCallback)
         }
 
     }
@@ -100,18 +114,32 @@ class BLEViewModel() : ViewModel() {
 
 
     fun disconnect() {
-        BLEgatt?.disconnect()
+        bleGatt?.disconnect()
     }
 
 
     fun motorWrite(command: ByteArray){
-        if(bleGatt == null || characteristic == null){ return}
-        BLEgatt?.writeCharacteristic(characteristic!!,command,BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+        val gatt = bleGatt
+        val char = characteristic
+        if(gatt == null || char == null){ return}
+        gatt.writeCharacteristic(char,command,BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
     }
 
 
     fun onRead(){
-        BLEgatt?.readCharacteristic(characteristic)
+        bleGatt?.readCharacteristic(characteristic)
+    }
+
+    private fun logConnection(connectionType: String) {
+        viewModelScope.launch(Dispatchers.IO){
+            val connectionDao = AppDatabase.getDatabase(application).connectionDao()
+
+            val connection = Connections(
+                connectionType = connectionType,
+                dateTime = System.currentTimeMillis()
+            )
+            connectionDao.insertAll(connection)
+        }
     }
 
 
