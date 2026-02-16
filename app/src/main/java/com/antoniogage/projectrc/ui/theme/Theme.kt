@@ -12,15 +12,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = lightPurp,
+    secondary = orangeish,
+    tertiary = redishPurple,
+    background = backgroundNightBlue,
+    onPrimary = lightPurp,
+    onSecondary = orangeish,
+    onTertiary = redishPurple,
+    surface = backgroundNightBlue
+
+
+
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = lightPurp,
+    secondary = redishPurple,
+    tertiary = orangeish,
+    background = backgroundlightPurp,
+    onPrimary = backgroundlightPurp,
+    onSecondary = backgroundlightPurp,
+    onTertiary = orangeish,
+    surface = backgroundlightPurp
+
+
+
+
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -37,7 +54,7 @@ private val LightColorScheme = lightColorScheme(
 fun ProjectRCTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

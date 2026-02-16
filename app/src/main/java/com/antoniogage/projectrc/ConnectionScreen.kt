@@ -42,7 +42,7 @@ fun ConnectionScreen(
     onDeviceConnected:() -> Unit = {}){
 
     val context = LocalContext.current
-    val connectionStatus by bleViewModel._connectionStatus.collectAsState()
+    val connectionStatus by bleViewModel.connectionStatus.collectAsState()
 
     val blePermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 

@@ -75,9 +75,9 @@ fun DpadControl(bleViewModel: BLEViewModel){
         HoldButton(
             unselectedImage = R.drawable.dpad_up,
             selectedImage = R.drawable.filled_up,
-            onClick = {bleViewModel.motorWrite(commands.forward) },
+            onClick = {bleViewModel.motorWrite(Commands.forward) },
             contentDescription = "Forward",
-            onRelease = {bleViewModel.motorWrite(commands.stop) }
+            onRelease = {bleViewModel.motorWrite(Commands.stop) }
         )
         Row(modifier = Modifier.fillMaxWidth(0.25f),
             horizontalArrangement = Arrangement.SpaceBetween)
@@ -86,26 +86,26 @@ fun DpadControl(bleViewModel: BLEViewModel){
             HoldButton(
                 unselectedImage = R.drawable.dpad_left,
                 selectedImage = R.drawable.filled_left,
-                onClick = {bleViewModel.motorWrite(commands.left) },
+                onClick = {bleViewModel.motorWrite(Commands.left) },
                 contentDescription = "left",
-                onRelease = {bleViewModel.motorWrite(commands.stop)}
+                onRelease = {bleViewModel.motorWrite(Commands.stop)}
             )
 
             HoldButton(
                 unselectedImage = R.drawable.dpad_right,
                 selectedImage = R.drawable.filled_right,
-                onClick = {bleViewModel.motorWrite(commands.right) },
+                onClick = {bleViewModel.motorWrite(Commands.right) },
                 contentDescription = "Right",
-                onRelease = {bleViewModel.motorWrite(commands.stop)}
+                onRelease = {bleViewModel.motorWrite(Commands.stop)}
             )
         }
 
         HoldButton(
             unselectedImage = R.drawable.dpad_down,
             selectedImage = R.drawable.filled_down,
-            onClick = {bleViewModel.motorWrite(commands.backward) },
+            onClick = {bleViewModel.motorWrite(Commands.backward) },
             contentDescription = "Down",
-            onRelease = {bleViewModel.motorWrite(commands.stop)}
+            onRelease = {bleViewModel.motorWrite(Commands.stop)}
         )
 
     }
