@@ -31,6 +31,8 @@ object commands{
     val left : ByteArray = "l".toByteArray()
     val right : ByteArray = "r".toByteArray()
 
+    val stop : ByteArray = "s".toByteArray()
+
 }
 
 @SuppressLint("MissingPermission")

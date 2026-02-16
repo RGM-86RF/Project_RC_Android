@@ -1,22 +1,31 @@
 package com.antoniogage.projectrc
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
+import androidx.compose.foundation.interaction.Interaction
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,8 +52,12 @@ fun ControllerScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize()
+            .padding(
+                horizontal = 75.dp,
+                vertical = 24.dp
+            ),
+        contentAlignment = Alignment.BottomStart
     ) {
 
 
@@ -59,34 +72,41 @@ fun DpadControl(bleViewModel: BLEViewModel){
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        IconButton(onClick = {bleViewModel.motorWrite(commands.forward)  }){
-            Icon(painter = painterResource(id = R.drawable.dpad_up),
-                contentDescription = "Up"
-
-            )
-        }
-        Row(modifier = Modifier.fillMaxWidth(0.4f),
+        HoldButton(
+            unselectedImage = R.drawable.dpad_up,
+            selectedImage = R.drawable.filled_up,
+            onClick = {bleViewModel.motorWrite(commands.forward) },
+            contentDescription = "Forward",
+            onRelease = {bleViewModel.motorWrite(commands.stop) }
+        )
+        Row(modifier = Modifier.fillMaxWidth(0.25f),
             horizontalArrangement = Arrangement.SpaceBetween)
         {
-            IconButton(onClick = {bleViewModel.motorWrite(commands.left) }){
-                Icon(painter = painterResource(id = R.drawable.dpad_left),
-                    contentDescription = "Left"
 
-                )
-            }
-            IconButton(onClick = { bleViewModel.motorWrite(commands.right)}){
-                Icon(painter = painterResource(id = R.drawable.dpad_right),
-                    contentDescription = "Right"
+            HoldButton(
+                unselectedImage = R.drawable.dpad_left,
+                selectedImage = R.drawable.filled_left,
+                onClick = {bleViewModel.motorWrite(commands.left) },
+                contentDescription = "left",
+                onRelease = {bleViewModel.motorWrite(commands.stop)}
+            )
 
-                )
-            }
-        }
-        IconButton(onClick = {bleViewModel.motorWrite(commands.backward) }){
-            Icon(painter = painterResource(id = R.drawable.dpad_down),
-                contentDescription = "Down"
-
+            HoldButton(
+                unselectedImage = R.drawable.dpad_right,
+                selectedImage = R.drawable.filled_right,
+                onClick = {bleViewModel.motorWrite(commands.right) },
+                contentDescription = "Right",
+                onRelease = {bleViewModel.motorWrite(commands.stop)}
             )
         }
+
+        HoldButton(
+            unselectedImage = R.drawable.dpad_down,
+            selectedImage = R.drawable.filled_down,
+            onClick = {bleViewModel.motorWrite(commands.backward) },
+            contentDescription = "Down",
+            onRelease = {bleViewModel.motorWrite(commands.stop)}
+        )
 
     }
 }
@@ -110,6 +130,58 @@ private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
+}
+
+
+@Composable
+fun HoldButton(
+    unselectedImage: Int,
+    selectedImage: Int,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    onRelease: () -> Unit
+){
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val releasedListener by rememberUpdatedState(onRelease)
+    val pressedListener by rememberUpdatedState(onClick)
+    val interactions = remember { mutableStateListOf<Interaction>() }
+
+
+    LaunchedEffect(interactionSource) {
+        interactionSource.interactions.collect { interaction ->
+            when (interaction) {
+                is PressInteraction.Press -> {
+                    interactions.add(interaction)
+                    pressedListener()
+
+                }
+                is PressInteraction.Release -> {
+                    interactions.remove(interaction.press)
+                    releasedListener()
+                }
+                is PressInteraction.Cancel -> {
+                    interactions.remove(interaction.press)
+                    releasedListener()
+                }
+
+            }
+        }
+
+    }
+
+
+    IconButton(
+        modifier = modifier,
+        onClick = {  },
+        interactionSource = interactionSource
+    ) {
+        Icon(
+            painter = if (isPressed) painterResource(id = selectedImage) else painterResource( id = unselectedImage),
+            contentDescription = contentDescription
+        )
+    }
 }
 
 @Preview(showBackground = true)

@@ -85,35 +85,35 @@ fun ConnectionScreen(
         }
         }
         Box(modifier = Modifier.weight(1f)){
-            when{
+            when {
                 !permissionState.allPermissionsGranted -> {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
-                    ){
+                    ) {
                         Text("Please grant location permissions")
-                        Button(onClick = { permissionState.launchMultiplePermissionRequest() }){
+                        Button(onClick = { permissionState.launchMultiplePermissionRequest() }) {
                             Text("Grant permissions")
                         }
+                    }
                 }
-            }
 
 
-            }
-            if(connectionStatus == ConnectionStatus.CONNECTING || connectionStatus == ConnectionStatus.CONNECTED){
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ){
-                    CircularProgressIndicator()
-                    Text("Connecting...")
+                 connectionStatus == ConnectionStatus.CONNECTING || connectionStatus == ConnectionStatus.CONNECTED -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator()
+                        Text("Connecting...")
+                    }
                 }
-            }
-            else{
-                FindDevicesScreen { clickedDevice ->
-                    bleViewModel.connect(context, clickedDevice)
+                else -> {
+                    FindDevicesScreen { clickedDevice ->
+                        bleViewModel.connect(context, clickedDevice)
+                    }
                 }
             }
         }
