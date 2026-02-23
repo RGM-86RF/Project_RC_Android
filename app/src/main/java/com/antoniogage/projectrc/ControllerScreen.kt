@@ -19,9 +19,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -33,6 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.antoniogage.projectrc.ui.theme.orangeish
 
 
 @Composable
@@ -59,10 +63,19 @@ fun ControllerScreen(
             ),
         contentAlignment = Alignment.BottomStart
     ) {
-
-
         DpadControl(bleViewModel = bleViewModel)
     }
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .padding(
+                horizontal = 75.dp,
+                vertical = 24.dp
+            ),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        SpeedSlider(bleViewModel = bleViewModel)
+    }
+
 
 }
 
@@ -112,7 +125,7 @@ fun DpadControl(bleViewModel: BLEViewModel){
 }
 
 @Composable
-private fun LockScreenOrientation(orientation: Int) {
+private fun LockScreenOrientation(@Suppress("SameParameterValue") orientation: Int) {
     val context = LocalContext.current
 
     DisposableEffect(Unit) {
@@ -179,10 +192,47 @@ fun HoldButton(
     ) {
         Icon(
             painter = if (isPressed) painterResource(id = selectedImage) else painterResource( id = unselectedImage),
-            contentDescription = contentDescription
+            contentDescription = contentDescription,
+            tint = orangeish
         )
     }
 }
+
+
+@Composable
+fun SpeedSlider(bleViewModel: BLEViewModel)
+{
+    val currentSpeed by bleViewModel.motorSpeed.collectAsState()
+
+    Column(
+        modifier = Modifier.fillMaxWidth(0.35f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ){
+        Slider(
+            value = currentSpeed.toFloat(),
+            onValueChange = { newPosition ->
+                bleViewModel.updateMotorSpeed(newPosition.toInt())
+            },
+            onValueChangeFinished = {
+                // move onValueChange lambda to here.
+                val speedValue = currentSpeed.toString()
+                bleViewModel.motorWrite(speedValue.toByteArray())
+            },
+            valueRange = 0f..255f,
+            colors = androidx.compose.material3.SliderDefaults.colors(
+                thumbColor = orangeish,
+                activeTrackColor = orangeish,
+                inactiveTrackColor = orangeish,
+
+            )
+        )
+            Text(text = currentSpeed.toString())
+
+    }
+
+}
+
 
 @Preview(showBackground = true)
 @Composable

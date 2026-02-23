@@ -1,6 +1,5 @@
 package com.antoniogage.projectrc
 
-import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement

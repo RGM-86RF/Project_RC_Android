@@ -6,37 +6,38 @@ import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Delete
 import androidx.room.Entity
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.Upsert
 
-@Entity(tableName = "Connection")
-data class Connections(
-    @PrimaryKey(autoGenerate = true) val uid: Int = 0,
-    @ColumnInfo(name = "Connection_Type") val connectionType: String,
-    @ColumnInfo(name = "Date/Time") val dateTime: Long
+@Entity(tableName = "Speed")
+data class Speed(
+    @PrimaryKey val uid: Int = 1,
+    @ColumnInfo(name = "motor_speed") val motorSpeed: Int = 0,
+
 
 )
 
 @Dao
-interface ConnectionDao {
-    @Query("SELECT * FROM Connection")
-    suspend fun getAll(): List<Connections>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(vararg connections: Connections)
+interface SpeedDao {
+    @Query("SELECT * FROM Speed WHERE uid = 1")
+    suspend fun getSpeed(): Speed?
 
     @Delete
-    suspend fun delete(connection: Connections)
+    suspend fun delete(speed: Speed)
 
+    @Upsert
+    suspend fun upsert(speed: Speed)
+
+    @Query("UPDATE Speed SET motor_speed = :speed WHERE uid = 1")
+    suspend fun updateSpeed(speed: Int)
 }
 
-@Database(entities = [Connections::class], version = 1)
+@Database(entities = [Speed::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun connectionDao(): ConnectionDao
+    abstract fun speedDao(): SpeedDao
 
     companion object {
 
