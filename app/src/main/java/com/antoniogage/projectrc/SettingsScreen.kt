@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -61,7 +62,7 @@ fun SettingsScreen(onHomeClick: () -> Unit = {}) {
             CenterAlignedTopAppBar(
                 title = { Text("Settings")},
                 navigationIcon = {
-                    IconButton(onClick =  onHomeClick ) {
+                    FilledTonalIconButton(onClick =  onHomeClick ) {
                         Icon(Icons.Default.Home, contentDescription = "Home")
                     }
                 }
@@ -105,29 +106,6 @@ fun SettingsScreen(onHomeClick: () -> Unit = {}) {
         }
     }
 
-
-
-//    Box(Modifier.fillMaxSize().padding(24.dp)){
-//        IconButton({onHomeClick()},
-//            Modifier.align(Alignment.TopStart)){
-//                Icon(Icons.Default.Home,"Home")
-//            }
-//        Text(
-//            "Settings",
-//            Modifier.align(Alignment.TopCenter),
-//            style = MaterialTheme.typography.headlineSmall,
-//            )
-//        Column(
-//            Modifier.align(Alignment.Center),
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            Text(
-//                "Settings",
-//                style = MaterialTheme.typography.headlineLarge,
-//
-//            )
-//        }
-//    }
 }
 
 @Composable

@@ -35,8 +35,11 @@ object Commands{
     val backward : ByteArray = "b".toByteArray()
     val left : ByteArray = "l".toByteArray()
     val right : ByteArray = "r".toByteArray()
-
     val stop : ByteArray = "s".toByteArray()
+
+    val freeRoamOn : ByteArray = "fr".toByteArray()
+
+    val freeRoamOff : ByteArray = "stop".toByteArray()
 
 }
 

@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -30,7 +31,7 @@ fun HomeScreen(
 ) {
     Box(modifier = Modifier.fillMaxSize().padding(24.dp))
     {
-        IconButton({onSettingsClick()},
+        FilledTonalIconButton({onSettingsClick()},
            Modifier.align(Alignment.TopEnd)
         )
     {   Icon(Icons.Default.Settings,"Settings")
@@ -40,8 +41,13 @@ fun HomeScreen(
             Text(
            text =  "Project RC",
             style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold
-        )
+            fontWeight = FontWeight.Bold)
+
+            Text(
+                modifier = Modifier.padding(top = 20.dp),
+                text = "Bluetooth Low Energy RC Controller App",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
         Button(
             {onConnectClick()},

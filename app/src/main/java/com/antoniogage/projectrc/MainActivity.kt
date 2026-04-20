@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable("Controller") {
-                            ControllerScreen(bleViewModel = bleViewModel, onHomeClick = { navController.popBackStack()})
+                            ControllerScreen(bleViewModel = bleViewModel, onHomeClick = { navController.popBackStack()}, onSettingsClick = { navController.navigate("settings") })
                         }
                     }
                 }

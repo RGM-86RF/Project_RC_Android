@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,13 +59,11 @@ internal fun FindDevicesScreen(onConnect: (BluetoothDevice) -> Unit) {
         mutableStateListOf<BluetoothDevice>()
     }
     val pairedDevices = remember {
-        // Get a list of previously paired devices
         mutableStateListOf<BluetoothDevice>(*adapter.bondedDevices.toTypedArray())
     }
 
 
-    // This effect will start scanning for devices when the screen is visible
-    // If scanning is stop removing the effect will stop the scanning.
+
 
         LaunchedEffect(scanning) {
         if (scanning) {
@@ -106,7 +106,10 @@ internal fun FindDevicesScreen(onConnect: (BluetoothDevice) -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = "Available devices", style = MaterialTheme.typography.titleSmall)
+            Text(
+                text = "Available devices: ",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold)
             if (scanning) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
             } else {
@@ -122,7 +125,7 @@ internal fun FindDevicesScreen(onConnect: (BluetoothDevice) -> Unit) {
         }
 
         LazyColumn(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (devices.isEmpty() && !scanning) {
@@ -139,8 +142,12 @@ internal fun FindDevicesScreen(onConnect: (BluetoothDevice) -> Unit) {
 
             if (pairedDevices.isNotEmpty()) {
                 item {
-                    Text(text = "Saved devices",
-                        style = MaterialTheme.typography.titleSmall)
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                item {
+                    Text(text = "Saved devices: ",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold)
                 }
                 items(pairedDevices, key = { it.address }) {
                     BluetoothDeviceItem(
@@ -172,15 +179,15 @@ internal fun BluetoothDeviceItem(
             text = bluetoothDevice.name ?: bluetoothDevice.address,
             style = TextStyle(fontWeight = FontWeight.Bold),
         )
-        Text(bluetoothDevice.address)
-        val state = when (bluetoothDevice.bondState) {
-            BluetoothDevice.BOND_BONDED -> "Paired"
-            BluetoothDevice.BOND_BONDING -> "Pairing"
-            else -> "None"
-        }
-        Text(text = state)
-
+//        Text(bluetoothDevice.address)
+//        val state = when (bluetoothDevice.bondState) {
+//            BluetoothDevice.BOND_BONDED -> "Paired"
+//            BluetoothDevice.BOND_BONDING -> "Pairing"
+//            else -> "None"
+//        }
+//        Text(text = state)
     }
+    HorizontalDivider()
 }
 
 
